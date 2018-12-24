@@ -4,35 +4,39 @@
 
 pkg load io;
 
+################################################################################
+
 [X, Xheader] = xlsread('SY1-30_12212018.xlsx');
 position = X(:,1);
 force = X(:,2);
 
-plot(position, force)
+figure(1, "position", [1,1,1800,1200]);
+plot(position, force, "ob")
+set(gca, "fontsize", 24);
 
-
+################################################################################
 
 [X, Xheader] = xlsread('SY1-50_12212018.xlsx');
 position = X(:,1);
 force = X(:,2);
 time = 1:rows(X);
 
-# plot the raw data
+# plot the raw data with blue points ("ob")
 figure(1, "position", [1,1,1800,1200]);
-plot(position, force);
+plot(position, force, "ob");
 xlabel("Position (mm)");
 ylabel("Force (N)");
 set(gca, "fontsize", 24);
 
 # plot position vs time and force vs time
 figure(1, "position", [1,1,1800,1200]);
-plot(time, position, "linewidth", 3);
+plot(time, position, "ob");
 xlabel("Time");
 ylabel("Position (mm)");
 set(gca, "fontsize", 24);
 
 figure(1, "position", [1,1,1800,1200]);
-plot(time, force, "linewidth", 3);
+plot(time, force, "ob");
 xlabel("Time");
 ylabel("Force (N)");
 set(gca, "fontsize", 24);
@@ -49,23 +53,26 @@ position_clipped = position(idx);
 force_clipped = force(idx);
 
 figure(1, "position", [1,1,1800,1200]);
-plot(position_clipped, force_clipped);
+plot(position_clipped, force_clipped, "ob");
 xlabel("Position (mm)");
 ylabel("Force (N)");
 set(gca, "fontsize", 24);
 
 work = trapz(position_clipped, force_clipped - zero_force);
-work
+work # N mm
 
 # splinefitting 
 # breaks is the places where the splines are fit together
 # linpace fills the space with a certain number of points
 breaks = linspace(position_a, position_b, 100);
 spline_force = splinefit(position_clipped, force_clipped, breaks, "order", 2, "periodic", true);
+# predict the splines
+spline_predict_force = ppval(spline_force, position_clipped);
 
 figure(1, "position", [1,1,1800,1200]);
+# plot the data with blue circles ("ob") and the spline with red lines ("-r")
 plot(position_clipped, force_clipped, "ob", 
-     position_clipped, ppval(spline_force, position_clipped), "-r");
+     position_clipped, spline_predict_force, "-r");
 xlabel("Position (mm)");
 ylabel("Force (N)");
 set(gca, "fontsize", 24);
